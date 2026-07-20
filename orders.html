@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — Shopify</title>
+  <meta name="description" content="View your order history and track fulfillment status." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>My Orders</h1>
+        <p>Track your purchases and view order details.</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="orders-loading"><div class="spinner"></div></div>
+
+      <!-- Error -->
+      <div id="orders-error" class="hidden">
+        <div class="alert alert--error">
+          <span class="alert__icon">❌</span>
+          <span id="orders-error-msg"></span>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="orders-empty" class="hidden empty-state">
+        <div class="empty-icon">📦</div>
+        <p>You haven't placed any orders yet.</p>
+        <a href="index.html" class="btn btn--primary">Start Shopping</a>
+      </div>
+
+      <!-- Orders list -->
+      <div id="orders-list" class="hidden" style="display:flex;flex-direction:column;gap:var(--space-4);"></div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/orders.js"></script>
+</body>
+</html>

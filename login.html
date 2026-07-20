@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — Shopify</title>
+  <meta name="description" content="Log in to your Shopify account to start shopping." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card animate-fade-in-up">
+      <div class="auth-card__logo">
+        <span class="logo-text">Shopify</span>
+      </div>
+
+      <h2>Welcome back</h2>
+      <p>Log in to your account to continue shopping.</p>
+
+      <!-- Alert: error messages, or "unverified" message with resend option -->
+      <div id="alert-box" class="hidden"></div>
+
+      <!-- Shown only when the user gets a 403 (not verified) -->
+      <div id="unverified-banner" class="hidden alert alert--warning">
+        <span class="alert__icon">⚠️</span>
+        <div>
+          <strong>Email not verified.</strong>
+          Your account needs to be verified before you can log in.
+          <br />
+          <button
+            id="go-verify-btn"
+            class="btn btn--sm btn--ghost"
+            style="margin-top:8px"
+          >
+            Go to Verification Page
+          </button>
+          <button
+            id="resend-from-login-btn"
+            class="btn btn--sm btn--secondary"
+            style="margin-top:8px; margin-left:8px"
+          >
+            Resend Code
+          </button>
+        </div>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input
+            class="form-control"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">
+            Password
+            <a href="forgot-password.html" style="float:right; font-weight:400; font-size:0.8rem;">
+              Forgot password?
+            </a>
+          </label>
+          <input
+            class="form-control"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button class="btn btn--primary btn--full btn--lg" type="submit" id="submit-btn">
+          Log In
+        </button>
+      </form>
+
+      <div class="auth-card__footer">
+        Don't have an account? <a href="signup.html">Sign up free</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

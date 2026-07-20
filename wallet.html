@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Wallet — Shopify</title>
+  <meta name="description" content="View your wallet balance and transaction history." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container" style="max-width:800px;">
+      <div class="page-header">
+        <h1>My Wallet</h1>
+        <p>Your balance and recent transactions.</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="wallet-loading"><div class="spinner"></div></div>
+
+      <!-- Error -->
+      <div id="wallet-error" class="hidden">
+        <div class="alert alert--error">
+          <span class="alert__icon">❌</span>
+          <span id="wallet-error-msg"></span>
+        </div>
+      </div>
+
+      <!-- Wallet content -->
+      <div id="wallet-content" class="hidden">
+        <!-- Balance card -->
+        <div class="wallet-balance-card animate-fade-in-up" style="margin-bottom:var(--space-6);">
+          <div class="wallet-balance-label">Available Balance</div>
+          <div class="wallet-balance-amount" id="wallet-balance-display">$0.00</div>
+          <div style="margin-top:var(--space-3);opacity:0.7;font-size:0.85rem;">
+            Used for purchases at checkout · Topped up by admin
+          </div>
+        </div>
+
+        <!-- Transaction history -->
+        <div class="card">
+          <div class="card__header">
+            <span class="card__title">Transaction History</span>
+          </div>
+
+          <!-- Loading transactions -->
+          <div id="tx-loading" style="padding:var(--space-5);">
+            <div class="spinner spinner--small"></div>
+          </div>
+
+          <!-- Empty state -->
+          <div id="tx-empty" class="hidden" style="padding:var(--space-8);text-align:center;">
+            <p class="text-muted">No transactions yet.</p>
+          </div>
+
+          <!-- Transactions table -->
+          <div class="table-wrapper" style="border:none;border-radius:0;" id="tx-table-wrapper">
+            <table class="table" id="tx-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th style="text-align:right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="tx-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/wallet.js"></script>
+</body>
+</html>

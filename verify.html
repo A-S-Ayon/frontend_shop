@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Email — Shopify</title>
+  <meta name="description" content="Enter the 6-digit code we sent to your email to verify your Shopify account." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card animate-fade-in-up">
+      <div class="auth-card__logo">
+        <span class="logo-text">Shopify</span>
+      </div>
+
+      <h2>Verify your email</h2>
+      <!-- The email is filled in automatically from the URL, but can be changed -->
+      <p id="verify-subtitle">Enter the 6-digit code we sent to your email.</p>
+
+      <div id="alert-box" class="hidden"></div>
+
+      <form id="verify-form" novalidate>
+        <!-- Email field (pre-filled from URL ?email=) -->
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input
+            class="form-control"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <!-- 6-digit code field -->
+        <div class="form-group">
+          <label class="form-label" for="code">Verification Code</label>
+          <input
+            class="form-control"
+            type="text"
+            id="code"
+            name="code"
+            placeholder="123456"
+            maxlength="6"
+            inputmode="numeric"
+            pattern="[0-9]{6}"
+            required
+            autocomplete="one-time-code"
+            style="letter-spacing: 0.25em; font-size: 1.2rem; text-align: center;"
+          />
+          <span class="form-hint">Check your inbox — the code expires soon.</span>
+        </div>
+
+        <button class="btn btn--primary btn--full btn--lg" type="submit" id="submit-btn">
+          Verify & Log In
+        </button>
+      </form>
+
+      <!-- Resend code section -->
+      <div style="margin-top: var(--space-5); text-align: center;">
+        <span class="text-muted">Didn't get a code?</span>
+        <button class="btn btn--ghost btn--sm" id="resend-btn" style="margin-left: 8px;">
+          Resend Code
+        </button>
+      </div>
+
+      <div class="auth-card__footer">
+        <a href="login.html">← Back to login</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/verify.js"></script>
+</body>
+</html>

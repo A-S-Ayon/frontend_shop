@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Shopify</title>
+  <meta name="description" content="Admin panel: manage products, orders, and wallet credits." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>⚙️ Admin Dashboard</h1>
+        <p>Manage products, orders, and customer wallets.</p>
+      </div>
+
+      <!-- Auth loading state -->
+      <div id="admin-loading"><div class="spinner"></div></div>
+
+      <!-- Admin content (shown after auth check) -->
+      <div id="admin-content" class="hidden">
+
+        <!-- Tab navigation -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('products')">🛍️ Products</button>
+          <button class="tab-btn"        onclick="switchTab('orders')">📦 Orders</button>
+          <button class="tab-btn"        onclick="switchTab('wallet')">💰 Wallet</button>
+        </div>
+
+        <!-- ══ PRODUCTS TAB ══════════════════════════════════════ -->
+        <div class="tab-panel active" id="tab-products">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-5);">
+            <h2 style="font-size:1.2rem;">All Products</h2>
+            <button class="btn btn--primary" onclick="openProductModal()">+ New Product</button>
+          </div>
+
+          <div id="product-alert" class="hidden"></div>
+
+          <!-- Products table -->
+          <div id="products-table-loading"><div class="spinner"></div></div>
+          <div class="table-wrapper" id="products-table-wrapper" style="display:none;">
+            <table class="table" id="products-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Active</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ══ ORDERS TAB ════════════════════════════════════════ -->
+        <div class="tab-panel" id="tab-orders">
+          <!-- Status filter -->
+          <div class="filter-bar" style="margin-bottom:var(--space-5);">
+            <label for="order-status-filter">Filter by status:</label>
+            <select class="form-control" id="order-status-filter" style="width:auto;min-width:160px;">
+              <option value="">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+            <button class="btn btn--secondary btn--sm" onclick="loadAdminOrders()">Apply</button>
+          </div>
+
+          <div id="orders-table-loading"><div class="spinner"></div></div>
+          <div id="orders-table-wrapper" class="table-wrapper" style="display:none;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Email</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Fulfillment</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+          <div id="orders-empty-admin" class="hidden empty-state">
+            <div class="empty-icon">📦</div>
+            <p>No orders found.</p>
+          </div>
+
+          <!-- Fulfillment action alert (shown inline next to each row) -->
+          <div id="fulfillment-alert" class="hidden" style="margin-top:var(--space-4);"></div>
+        </div>
+
+        <!-- ══ WALLET TAB ════════════════════════════════════════ -->
+        <div class="tab-panel" id="tab-wallet">
+          <h2 style="font-size:1.2rem;margin-bottom:var(--space-5);">Credit Customer Wallet</h2>
+          <p class="text-muted" style="margin-bottom:var(--space-5);">
+            Top up a customer's wallet balance for testing or demo purposes.
+            You'll need their User ID (UUID), which you can find in your Supabase database.
+          </p>
+
+          <div class="card" style="max-width:480px;">
+            <div class="card__body">
+              <div id="wallet-credit-alert" class="hidden"></div>
+              <form id="wallet-credit-form">
+                <div class="form-group">
+                  <label class="form-label" for="credit-user-id">Customer User ID (UUID)</label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="credit-user-id"
+                    placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="credit-amount">Amount to Credit ($)</label>
+                  <input
+                    class="form-control"
+                    type="number"
+                    id="credit-amount"
+                    placeholder="100.00"
+                    min="0.01"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <button class="btn btn--primary" type="submit" id="credit-submit-btn">
+                  💰 Credit Wallet
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /admin-content -->
+    </div>
+  </main>
+
+  <!-- ══ PRODUCT MODAL ══════════════════════════════════════ -->
+  <div class="modal-overlay" id="product-modal-overlay" onclick="closeProductModal(event)">
+    <div class="modal">
+      <div class="modal__header">
+        <span class="modal__title" id="product-modal-title">New Product</span>
+        <button class="modal__close" onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal__body">
+        <div id="product-modal-alert" class="hidden"></div>
+        <form id="product-modal-form">
+          <input type="hidden" id="pm-product-id" />
+          <div class="form-group">
+            <label class="form-label" for="pm-category">Category</label>
+            <select class="form-control" id="pm-category" required>
+              <option value="">Select category…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pm-name">Product Name</label>
+            <input class="form-control" type="text" id="pm-name" placeholder="Product name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pm-description">Description</label>
+            <textarea class="form-control" id="pm-description" rows="3" placeholder="Product description…"></textarea>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" for="pm-price">Price ($)</label>
+              <input class="form-control" type="number" id="pm-price" min="0" step="0.01" required />
+            </div>
+            <div class="form-group" id="pm-active-group" style="display:none;">
+              <label class="form-label" for="pm-active">Active?</label>
+              <select class="form-control" id="pm-active">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pm-image-url">Image URL (optional)</label>
+            <input class="form-control" type="url" id="pm-image-url" placeholder="https://…" />
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" onclick="closeProductModal()">Cancel</button>
+        <button class="btn btn--primary" onclick="handleSaveProduct()" id="product-modal-save-btn">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STOCK MODAL ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="stock-modal-overlay" onclick="closeStockModal(event)">
+    <div class="modal">
+      <div class="modal__header">
+        <span class="modal__title" id="stock-modal-title">Update Stock</span>
+        <button class="modal__close" onclick="closeStockModal()">✕</button>
+      </div>
+      <div class="modal__body">
+        <div id="stock-modal-alert" class="hidden"></div>
+        <form id="stock-modal-form">
+          <input type="hidden" id="sm-product-id" />
+          <div class="form-group">
+            <label class="form-label" for="sm-quantity">New Stock Quantity</label>
+            <input class="form-control" type="number" id="sm-quantity" min="0" step="1" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" onclick="closeStockModal()">Cancel</button>
+        <button class="btn btn--primary" onclick="handleSaveStock()" id="stock-modal-save-btn">Update Stock</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

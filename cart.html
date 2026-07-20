@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart — Shopify</title>
+  <meta name="description" content="Review your cart, adjust quantities, and proceed to checkout." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>Your Cart</h1>
+        <p>Review your items before checking out.</p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="cart-loading"><div class="spinner"></div></div>
+
+      <!-- Error state -->
+      <div id="cart-error" class="hidden">
+        <div class="alert alert--error">
+          <span class="alert__icon">❌</span>
+          <span id="cart-error-msg">Could not load cart.</span>
+        </div>
+      </div>
+
+      <!-- Empty cart -->
+      <div id="cart-empty" class="hidden empty-state">
+        <div class="empty-icon">🛒</div>
+        <p>Your cart is empty.</p>
+        <a href="index.html" class="btn btn--primary">Continue Shopping</a>
+      </div>
+
+      <!-- Cart content (items + summary sidebar) -->
+      <div id="cart-content" class="cart-layout hidden">
+        <!-- Left: cart items list -->
+        <div class="card">
+          <div class="card__header">
+            <span class="card__title">Items in Cart</span>
+            <button class="btn btn--danger btn--sm" onclick="handleClearCart()">Clear Cart</button>
+          </div>
+          <div id="cart-items-list"></div>
+        </div>
+
+        <!-- Right: order summary -->
+        <div class="order-summary">
+          <div class="order-summary__title">Order Summary</div>
+          <div class="order-summary__body" id="order-summary-body">
+            <!-- Rows injected by cart.js -->
+          </div>
+          <div class="order-summary__footer">
+            <a href="checkout.html" class="btn btn--primary btn--full btn--lg" id="checkout-btn">
+              Proceed to Checkout →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>

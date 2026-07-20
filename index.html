@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopify — Discover Amazing Products</title>
+  <meta name="description" content="Browse our full catalog of products across all categories. Filter by category, add to cart, or save to your wishlist." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Navigation (injected by nav.js) -->
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <!-- Page header -->
+      <div class="page-header">
+        <h1>Discover Products</h1>
+        <p>Browse our full catalog — add favourites to your wishlist or cart.</p>
+      </div>
+
+      <!-- Filter bar: category dropdown -->
+      <div class="filter-bar">
+        <label for="category-filter">Filter by category:</label>
+        <select class="form-control" id="category-filter" style="width:auto; min-width:180px;">
+          <option value="">All Categories</option>
+          <!-- Options are added dynamically by index.js -->
+        </select>
+
+        <!-- Search box -->
+        <input
+          class="form-control"
+          type="text"
+          id="search-input"
+          placeholder="Search products…"
+          style="flex:1; min-width:160px; max-width:320px;"
+        />
+      </div>
+
+      <!-- Loading spinner (shown while fetching) -->
+      <div id="products-loading">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Error message (shown if fetch fails) -->
+      <div id="products-error" class="hidden">
+        <div class="alert alert--error">
+          <span class="alert__icon">❌</span>
+          <span id="products-error-msg">Failed to load products.</span>
+        </div>
+      </div>
+
+      <!-- Empty state (shown when filter returns no results) -->
+      <div id="products-empty" class="hidden empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>No products found for this filter.</p>
+        <button class="btn btn--ghost" onclick="resetFilter()">Clear filter</button>
+      </div>
+
+      <!-- Product grid — cards are injected here -->
+      <div class="product-grid stagger-children" id="product-grid"></div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/index.js"></script>
+</body>
+</html>

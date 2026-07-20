@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Detail — Shopify</title>
+  <meta name="description" content="View product details, read customer reviews, and add to cart or wishlist." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <!-- Back link -->
+      <div style="padding-top: var(--space-6);">
+        <a href="index.html" class="btn btn--ghost btn--sm">← Back to Products</a>
+      </div>
+
+      <!-- Loading spinner -->
+      <div id="product-loading" style="padding: var(--space-8) 0;">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Error state -->
+      <div id="product-error" class="hidden" style="padding: var(--space-8) 0;">
+        <div class="alert alert--error">
+          <span class="alert__icon">❌</span>
+          <span id="product-error-msg">Could not load product.</span>
+        </div>
+      </div>
+
+      <!-- Product detail — populated by product.js -->
+      <div id="product-detail" class="product-detail hidden"></div>
+
+      <!-- ── Reviews Section ── -->
+      <section id="reviews-section" class="hidden" style="padding: var(--space-8) 0;">
+        <h3 id="review-summary-heading">Customer Reviews</h3>
+        <!-- Average rating summary -->
+        <div id="review-summary" style="margin: var(--space-4) 0 var(--space-6);"></div>
+
+        <!-- Write a review form (only shown when logged in) -->
+        <div id="review-form-container" class="hidden card" style="margin-bottom: var(--space-6);">
+          <div class="card__header">
+            <span class="card__title">Write a Review</span>
+          </div>
+          <div class="card__body">
+            <!-- API error/success messages for the review form -->
+            <div id="review-alert" class="hidden"></div>
+
+            <form id="review-form">
+              <!-- Star rating picker -->
+              <div class="form-group">
+                <label class="form-label">Your Rating</label>
+                <div class="star-rating" id="star-rating">
+                  <input type="radio" name="rating" id="star5" value="5"><label for="star5" title="5 stars">★</label>
+                  <input type="radio" name="rating" id="star4" value="4"><label for="star4" title="4 stars">★</label>
+                  <input type="radio" name="rating" id="star3" value="3"><label for="star3" title="3 stars">★</label>
+                  <input type="radio" name="rating" id="star2" value="2"><label for="star2" title="2 stars">★</label>
+                  <input type="radio" name="rating" id="star1" value="1"><label for="star1" title="1 star">★</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="review-comment">Your Comment</label>
+                <textarea
+                  class="form-control"
+                  id="review-comment"
+                  placeholder="Share your experience with this product…"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <button class="btn btn--primary" type="submit" id="review-submit-btn">
+                Submit Review
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Not logged in nudge -->
+        <div id="review-login-nudge" class="hidden" style="margin-bottom:var(--space-6);">
+          <div class="alert alert--info">
+            <span class="alert__icon">ℹ️</span>
+            <span><a href="login.html">Log in</a> to write a review. (Only verified buyers can review.)</span>
+          </div>
+        </div>
+
+        <!-- Reviews list -->
+        <div id="reviews-loading">
+          <div class="spinner"></div>
+        </div>
+        <div id="reviews-list" class="hidden" style="display:flex;flex-direction:column;gap:var(--space-3);"></div>
+        <div id="reviews-empty" class="hidden empty-state" style="padding:var(--space-6) 0;">
+          <div class="empty-icon">💬</div>
+          <p>No reviews yet. Be the first!</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/product.js"></script>
+</body>
+</html>

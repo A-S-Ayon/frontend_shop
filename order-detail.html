@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Detail — Shopify</title>
+  <meta name="description" content="View full order details, track delivery, download invoice, and confirm receipt." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main>
+    <div class="container">
+      <!-- Back link -->
+      <div style="padding-top:var(--space-6);">
+        <a href="orders.html" class="btn btn--ghost btn--sm">← Back to Orders</a>
+      </div>
+
+      <!-- Loading -->
+      <div id="order-loading" style="padding:var(--space-8) 0;"><div class="spinner"></div></div>
+
+      <!-- Error -->
+      <div id="order-error" class="hidden" style="padding:var(--space-8) 0;">
+        <div class="alert alert--error"><span class="alert__icon">❌</span><span id="order-error-msg"></span></div>
+      </div>
+
+      <!-- Order content (injected by order-detail.js) -->
+      <div id="order-content" class="hidden">
+
+        <!-- Header row: Order ID + status + invoice download -->
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:var(--space-4);">
+          <div>
+            <h1 id="order-title">Order #—</h1>
+            <p id="order-meta"></p>
+          </div>
+          <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;">
+            <span id="order-status-badge"></span>
+            <button class="btn btn--ghost btn--sm" id="invoice-btn" style="display:none;" onclick="handleDownloadInvoice()">
+              📄 Download Invoice
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Fulfillment Progress Tracker ── -->
+        <div class="card" style="margin-bottom:var(--space-5);">
+          <div class="card__header"><span class="card__title">📦 Delivery Status</span></div>
+          <div class="card__body">
+            <div id="fulfillment-tracker-container"></div>
+
+            <!-- Confirm Receipt button (shown only when Delivered and not yet confirmed) -->
+            <div id="confirm-receipt-section" class="hidden" style="margin-top:var(--space-5);">
+              <div id="confirm-receipt-alert" class="hidden"></div>
+              <button class="btn btn--success btn--lg" id="confirm-receipt-btn" onclick="handleConfirmReceipt()">
+                ✅ Confirm Receipt
+              </button>
+              <p class="text-muted text-small" style="margin-top:var(--space-2);">
+                Click to confirm you received your order.
+              </p>
+            </div>
+
+            <!-- Shown after confirmed -->
+            <div id="receipt-confirmed-state" class="hidden" style="margin-top:var(--space-4);">
+              <div class="alert alert--success">
+                <span class="alert__icon">✅</span>
+                <span>Receipt confirmed — thank you!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Status History Timeline ── -->
+        <div class="card" style="margin-bottom:var(--space-5);">
+          <div class="card__header"><span class="card__title">🕐 Status History</span></div>
+          <div class="card__body">
+            <div id="status-history-loading"><div class="spinner spinner--small"></div></div>
+            <div id="status-history-container" class="hidden timeline"></div>
+            <div id="status-history-empty" class="hidden">
+              <p class="text-muted">No status history yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Two-column: Items + Address ── -->
+        <div class="grid-2" style="margin-bottom:var(--space-5);">
+          <!-- Order Items -->
+          <div class="card">
+            <div class="card__header"><span class="card__title">🛍️ Items</span></div>
+            <div class="table-wrapper" style="border:none;border-radius:0;">
+              <table class="table" id="order-items-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="order-items-body"></tbody>
+              </table>
+            </div>
+            <div class="card__footer" style="display:flex;justify-content:flex-end;">
+              <strong>Order Total: <span id="order-total"></span></strong>
+            </div>
+          </div>
+
+          <!-- Shipping Address -->
+          <div class="card">
+            <div class="card__header"><span class="card__title">📍 Shipping Address</span></div>
+            <div class="card__body" id="order-address"></div>
+          </div>
+        </div>
+
+      </div><!-- /order-content -->
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/order-detail.js"></script>
+</body>
+</html>

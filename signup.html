@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Shopify</title>
+  <meta name="description" content="Create your Shopify account to start shopping. Sign up with your name, email, and password." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Nav is injected here by nav.js -->
+  <div id="nav-root"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card animate-fade-in-up">
+      <!-- Logo -->
+      <div class="auth-card__logo">
+        <span class="logo-text">Shopify</span>
+      </div>
+
+      <h2>Create your account</h2>
+      <p>Join us — we'll send a verification code to your email.</p>
+
+      <!-- Error / success messages appear here -->
+      <div id="alert-box" class="hidden"></div>
+
+      <!-- Signup form -->
+      <form id="signup-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input
+            class="form-control"
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Jane Doe"
+            required
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input
+            class="form-control"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="jane@example.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            class="form-control"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="At least 8 characters"
+            required
+            autocomplete="new-password"
+            minlength="8"
+          />
+        </div>
+
+        <!-- Submit button — shows a spinner while loading -->
+        <button class="btn btn--primary btn--full btn--lg" type="submit" id="submit-btn">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-card__footer">
+        Already have an account? <a href="login.html">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load scripts: api.js first (defines API functions), then auth.js, nav.js, signup.js -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/signup.js"></script>
+</body>
+</html>
