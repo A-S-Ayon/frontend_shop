@@ -131,5 +131,33 @@ async function updateNavCartCount() {
   }
 }
 
+/**
+ * Injects the floating customer support button into the page.
+ * Clicking it opens the Telegram support bot in a new tab.
+ */
+function renderSupportButton() {
+  // Avoid duplicate if somehow called twice
+  if (document.getElementById('support-fab')) return;
+
+  const fab = document.createElement('a');
+  fab.id        = 'support-fab';
+  fab.href      = 'https://t.me/as_ayon_bot';
+  fab.target    = '_blank';
+  fab.rel       = 'noopener noreferrer';
+  fab.title     = 'Customer Support — Chat with us on Telegram';
+  fab.setAttribute('aria-label', 'Customer Support');
+  fab.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
+      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.26l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.299z"/>
+    </svg>
+    <span class="support-fab__tooltip">Customer Support</span>
+  `;
+  document.body.appendChild(fab);
+}
+
 // ─── Auto-render when DOM is ready ───────────────────────────
-document.addEventListener('DOMContentLoaded', renderNav);
+document.addEventListener('DOMContentLoaded', () => {
+  renderNav();
+  renderSupportButton();
+});
+

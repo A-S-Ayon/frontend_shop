@@ -1531,3 +1531,90 @@ textarea.form-control {
 
   .product-card__actions { flex-direction: column; }
 }
+
+/* ============================================================
+   25. Customer Support Floating Action Button
+   ============================================================ */
+
+/* The Telegram icon button fixed in the bottom-right corner */
+#support-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+
+  /* Telegram brand blue */
+  background: #29A8E0;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(41, 168, 224, 0.45);
+
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  /* Subtle pulse to draw the eye */
+  animation: fab-pulse 2.8s ease-in-out infinite;
+}
+
+#support-fab:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 28px rgba(41, 168, 224, 0.65);
+  animation: none; /* stop pulse on hover */
+}
+
+#support-fab:active {
+  transform: scale(0.96);
+}
+
+/* Tooltip that slides in from the left on hover */
+.support-fab__tooltip {
+  position: absolute;
+  right: 64px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(-50%) translateX(6px);
+}
+
+#support-fab:hover .support-fab__tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@keyframes fab-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(41, 168, 224, 0.45); }
+  50%       { box-shadow: 0 4px 32px rgba(41, 168, 224, 0.75); }
+}
+
+/* Move the FAB up a bit on mobile so it doesn't overlap the bottom nav area */
+@media (max-width: 600px) {
+  #support-fab {
+    bottom: 20px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+}
+

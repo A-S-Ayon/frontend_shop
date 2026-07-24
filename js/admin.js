@@ -18,11 +18,44 @@ let editingProductId = null; // null = creating, number = editing
 
 /**
  * localFulfillmentMap stores the fulfillment status we know about for each
- * order. The GET /orders/admin/all endpoint may not return fulfillment_status,
- * so we track it here after every successful advance.
- * Format: { orderId: 'Shipped' | 'Out for Delivery' | 'Delivered' }
+ * order. Persisted in localStorage so it survives page refreshes.
+ * Format: { "orderId": 'Shipped' | 'Out for Delivery' | 'Delivered' }
  */
-let localFulfillmentMap = {};
+const FULFILLMENT_STORAGE_KEY = 'shopify_fulfillment_map';
+
+/** Load the map from localStorage (returns {} if nothing stored yet). */
+function loadFulfillmentMap() {
+  try {
+    return JSON.parse(localStorage.getItem(FULFILLMENT_STORAGE_KEY) || '{}');
+  } catch { return {}; }
+}
+
+/** Save the current map to localStorage. */
+function saveFulfillmentMap(map) {
+  try {
+    localStorage.setItem(FULFILLMENT_STORAGE_KEY, JSON.stringify(map));
+  } catch { /* storage full or private mode — silently ignore */ }
+}
+
+/** Record a fulfillment status for an order and persist it. */
+function setFulfillmentStatus(orderId, status) {
+  const map = loadFulfillmentMap();
+  map[String(orderId)] = status;
+  saveFulfillmentMap(map);
+}
+
+/** Get the best-known fulfillment status for an order. */
+function getFulfillmentStatus(orderId, apiValue) {
+  const map = loadFulfillmentMap();
+  // Prefer whatever is newer: if the API returned a real value, trust it
+  // and update our local map to match. Otherwise fall back to local map.
+  if (apiValue) {
+    map[String(orderId)] = apiValue;
+    saveFulfillmentMap(map);
+    return apiValue;
+  }
+  return map[String(orderId)] || null;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────
 function escHtml(str) {
@@ -293,20 +326,34 @@ async function loadAdminOrders() {
 
   const { data, error } = await getAllOrdersAdmin(statusFilter || null);
 
-  document.getElementById('orders-table-loading').style.display = 'none';
-
   if (error) {
+    document.getElementById('orders-table-loading').style.display = 'none';
     showTabAlert('fulfillment-alert', `Failed to load orders: ${error}`);
     return;
   }
 
   const orders = data || [];
   if (orders.length === 0) {
+    document.getElementById('orders-table-loading').style.display = 'none';
     document.getElementById('orders-empty-admin').classList.remove('hidden');
     return;
   }
 
+  // ── Fetch full details for every order in parallel ──────────
+  // GET /orders/admin/all doesn't return fulfillment_status, but
+  // GET /orders/{id} does. We fetch all of them concurrently so
+  // the fulfillment column always reflects the real DB value.
+  const detailResults = await Promise.all(orders.map(o => getOrder(o.id)));
+
+  // Merge the fulfillment_status from the detail response into the list
+  const enrichedOrders = orders.map((order, i) => ({
+    ...order,
+    fulfillment_status: detailResults[i]?.data?.fulfillment_status ?? null,
+  }));
+
+  document.getElementById('orders-table-loading').style.display = 'none';
   document.getElementById('orders-table-wrapper').style.display = 'block';
+
   const tbody = document.getElementById('orders-tbody');
 
   // Status badge helper (inline to avoid global conflict)
@@ -320,11 +367,9 @@ async function loadAdminOrders() {
     return `<span class="badge ${map[s] || 'badge--muted'}">${escHtml(s)}</span>`;
   };
 
-  tbody.innerHTML = orders.map(order => {
-    // Use localFulfillmentMap first (updated after each advance click),
-    // then fall back to what the API returned (may be undefined if the
-    // admin/all endpoint doesn't include fulfillment_status).
-    const knownStatus = localFulfillmentMap[order.id] ?? order.fulfillment_status ?? null;
+  tbody.innerHTML = enrichedOrders.map(order => {
+    // fulfillment_status is now fetched directly from the DB via GET /orders/{id}
+    const knownStatus = order.fulfillment_status || null;
 
     const next = nextFulfillmentStep(knownStatus);
     const advanceBtn = next
@@ -381,8 +426,8 @@ async function handleAdvanceFulfillment(orderId, nextStatus) {
     return;
   }
 
-  // ── Success: record the new status locally ──────────────────
-  localFulfillmentMap[orderId] = nextStatus;
+  // ── Success: persist the new status to localStorage ────────
+  setFulfillmentStatus(orderId, nextStatus);
 
   // Update the fulfillment badge in this row without a full reload
   const badgeCell = document.getElementById(`fulfill-badge-${orderId}`);
