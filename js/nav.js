@@ -141,7 +141,7 @@ function renderSupportButton() {
 
   const fab = document.createElement('a');
   fab.id        = 'support-fab';
-  fab.href      = 'https://t.me/as_ayon_bot';
+  fab.href      = 'https://web.telegram.org/k/#@as_ayon_bot';
   fab.target    = '_blank';
   fab.rel       = 'noopener noreferrer';
   fab.title     = 'Customer Support — Chat with us on Telegram';
