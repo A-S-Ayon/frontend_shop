@@ -45,12 +45,30 @@ async function renderNav() {
     ${admin    ? `<a href="admin.html"    class="navbar__link ${getActiveClass('admin.html')}">⚙️ Admin</a>` : ''}
   `;
 
+  // Build initials avatar from the user's name
+  const userName   = user?.name || user?.full_name || user?.email?.split('@')[0] || 'User';
+  const userId     = user?.id || user?.user_id || '';
+  const initials   = userName.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  // Short display of user ID (first 8 chars if UUID, full if short)
+  const shortId    = userId ? (userId.length > 8 ? userId.slice(0, 8) + '…' : userId) : '';
+
   const actionsHTML = loggedIn
     ? `<div class="nav-dropdown" id="user-dropdown">
          <button class="nav-dropdown__toggle" onclick="document.getElementById('user-dropdown').classList.toggle('open')">
-           👤 Account ▾
+           <span class="nav-avatar">${initials}</span>
+           <span class="nav-username">${userName.split(' ')[0]}</span>
+           <span style="font-size:0.7rem;opacity:0.7;">▾</span>
          </button>
          <div class="nav-dropdown__menu">
+           <!-- Profile card at top of dropdown -->
+           <div class="nav-profile-card">
+             <div class="nav-profile-card__avatar">${initials}</div>
+             <div class="nav-profile-card__info">
+               <div class="nav-profile-card__name">${userName}</div>
+               <div class="nav-profile-card__id">ID: ${shortId || '—'}</div>
+             </div>
+           </div>
+           <hr style="margin:4px 0;border-color:var(--border)">
            <a href="wallet.html"  class="nav-dropdown__item">💰 Wallet</a>
            <a href="orders.html"  class="nav-dropdown__item">📦 My Orders</a>
            <a href="wishlist.html"class="nav-dropdown__item">❤️ Wishlist</a>
@@ -60,6 +78,7 @@ async function renderNav() {
        </div>`
     : `<a href="login.html"  class="btn btn--ghost btn--sm">Log In</a>
        <a href="signup.html" class="btn btn--primary btn--sm">Sign Up</a>`;
+
 
   navRoot.innerHTML = `
     <nav class="navbar">
