@@ -88,19 +88,44 @@ async function requireAdmin() {
  *
  * @returns {{ user_id: string, role_id: number }|null}
  */
+/**
+ * Decodes the JWT payload (the middle part, base64-encoded) without
+ * verifying the signature. Safe to use on the client for reading fields
+ * like name, email, sub, role_id that the backend embedded at login.
+ * @returns {object} the decoded payload, or {} on error
+ */
+function decodeJwtPayload(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch { return {}; }
+}
+
 async function loadCurrentUser() {
-  if (!getToken()) {
+  const token = getToken();
+  if (!token) { window.currentUser = null; return null; }
+
+  // Decode the JWT directly — gives us whatever the backend stored in it
+  // (commonly: sub, name, email, role_id, user_id, username, etc.)
+  const jwtPayload = decodeJwtPayload(token);
+
+  // Also call /auth/me and /users/me in parallel for any extra fields
+  const [meResult, profileResult] = await Promise.all([
+    authMe(),
+    getUserProfile(),
+  ]);
+
+  if (!meResult.data && !jwtPayload?.sub) {
     window.currentUser = null;
     return null;
   }
-  // Fetch JWT info + full profile in parallel
-  const [meResult, profileResult] = await Promise.all([authMe(), getUserProfile()]);
-  if (!meResult.data) {
-    window.currentUser = null;
-    return null;
-  }
-  // Merge: JWT fields + real profile fields (name, username, email, etc.)
-  window.currentUser = { ...meResult.data, ...(profileResult.data || {}) };
+
+  // Merge all sources — later sources win if the same key appears
+  // Priority: /users/me profile > /auth/me > JWT payload
+  window.currentUser = {
+    ...jwtPayload,
+    ...(meResult.data   || {}),
+    ...(profileResult.data || {}),
+  };
   return window.currentUser;
 }
 

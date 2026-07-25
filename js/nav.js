@@ -37,20 +37,25 @@ async function renderNav() {
   const admin = user?.role_id === 3;
 
   const mainLinks = `
-    <a href="index.html"    class="navbar__link ${getActiveClass('index.html')}">🛍️ Shop</a>
-    ${loggedIn ? `<a href="cart.html"     class="navbar__link ${getActiveClass('cart.html')}">🛒 Cart <span class="nav-cart-count" id="nav-cart-count">0</span></a>` : ''}
-    ${loggedIn ? `<a href="orders.html"   class="navbar__link ${getActiveClass('orders.html')}">📦 Orders</a>` : ''}
-    ${loggedIn ? `<a href="wishlist.html" class="navbar__link ${getActiveClass('wishlist.html')}">❤️ Wishlist</a>` : ''}
-    ${loggedIn ? `<a href="wallet.html"   class="navbar__link ${getActiveClass('wallet.html')}">💰 Wallet</a>` : ''}
-    ${admin    ? `<a href="admin.html"    class="navbar__link ${getActiveClass('admin.html')}">⚙️ Admin</a>` : ''}
+    <a href="index.html"    class="navbar__link ${getActiveClass('index.html')}">Shop</a>
+    ${loggedIn ? `<a href="cart.html"     class="navbar__link ${getActiveClass('cart.html')}">Cart <span class="nav-cart-count" id="nav-cart-count">0</span></a>` : ''}
+    ${loggedIn ? `<a href="orders.html"   class="navbar__link ${getActiveClass('orders.html')}">Orders</a>` : ''}
+    ${loggedIn ? `<a href="wishlist.html" class="navbar__link ${getActiveClass('wishlist.html')}">Wishlist</a>` : ''}
+    ${loggedIn ? `<a href="wallet.html"   class="navbar__link ${getActiveClass('wallet.html')}">Wallet</a>` : ''}
+    ${admin    ? `<a href="admin.html"    class="navbar__link ${getActiveClass('admin.html')}">Admin</a>` : ''}
   `;
 
-  // Real username from DB — check all common field names the backend might use
-  const userName = user?.username || user?.name || user?.full_name
-                   || user?.email?.split('@')[0] || 'User';
-  const userId   = user?.id || user?.user_id || '';
+  // Check every field name the backend might use for the username
+  const userName = user?.username
+                || user?.name
+                || user?.full_name
+                || user?.display_name
+                || user?.sub        // JWT 'sub' field sometimes holds username
+                || user?.email?.split('@')[0]
+                || 'User';
+  const userId   = user?.id || user?.user_id || user?.sub || '';
   const initials = userName.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  const shortId  = userId ? (userId.length > 8 ? userId.slice(0, 8) + '…' : userId) : '—';
+  const shortId  = userId ? (String(userId).length > 8 ? String(userId).slice(0, 8) + '…' : userId) : '—';
 
   const actionsHTML = loggedIn
     ? `<div class="nav-dropdown" id="user-dropdown">
