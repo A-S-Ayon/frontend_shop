@@ -93,8 +93,14 @@ async function loadCurrentUser() {
     window.currentUser = null;
     return null;
   }
-  const { data } = await authMe();
-  window.currentUser = data || null;
+  // Fetch JWT info + full profile in parallel
+  const [meResult, profileResult] = await Promise.all([authMe(), getUserProfile()]);
+  if (!meResult.data) {
+    window.currentUser = null;
+    return null;
+  }
+  // Merge: JWT fields + real profile fields (name, username, email, etc.)
+  window.currentUser = { ...meResult.data, ...(profileResult.data || {}) };
   return window.currentUser;
 }
 

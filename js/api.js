@@ -148,6 +148,15 @@ async function authMe() {
 }
 
 /**
+ * GET /users/me
+ * Returns the full profile of the current user including name, email, etc.
+ * @returns {{ data: { id, name, username, email, role_id }, error }}
+ */
+async function getUserProfile() {
+  return apiFetch('GET', '/users/me', null, true);
+}
+
+/**
  * POST /auth/forgot-password
  * Sends a password-reset link to the given email.
  * @returns {{ data: { message: string }, error }}

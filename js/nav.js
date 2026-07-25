@@ -45,39 +45,41 @@ async function renderNav() {
     ${admin    ? `<a href="admin.html"    class="navbar__link ${getActiveClass('admin.html')}">⚙️ Admin</a>` : ''}
   `;
 
-  // Build initials avatar from the user's name
-  const userName   = user?.name || user?.full_name || user?.email?.split('@')[0] || 'User';
-  const userId     = user?.id || user?.user_id || '';
-  const initials   = userName.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  // Short display of user ID (first 8 chars if UUID, full if short)
-  const shortId    = userId ? (userId.length > 8 ? userId.slice(0, 8) + '…' : userId) : '';
+  // Real username from DB — check all common field names the backend might use
+  const userName = user?.username || user?.name || user?.full_name
+                   || user?.email?.split('@')[0] || 'User';
+  const userId   = user?.id || user?.user_id || '';
+  const initials = userName.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const shortId  = userId ? (userId.length > 8 ? userId.slice(0, 8) + '…' : userId) : '—';
 
   const actionsHTML = loggedIn
     ? `<div class="nav-dropdown" id="user-dropdown">
          <button class="nav-dropdown__toggle" onclick="document.getElementById('user-dropdown').classList.toggle('open')">
            <span class="nav-avatar">${initials}</span>
-           <span class="nav-username">${userName.split(' ')[0]}</span>
+           <span class="nav-username">${userName}</span>
            <span style="font-size:0.7rem;opacity:0.7;">▾</span>
          </button>
          <div class="nav-dropdown__menu">
-           <!-- Profile card at top of dropdown -->
            <div class="nav-profile-card">
              <div class="nav-profile-card__avatar">${initials}</div>
              <div class="nav-profile-card__info">
                <div class="nav-profile-card__name">${userName}</div>
-               <div class="nav-profile-card__id">ID: ${shortId || '—'}</div>
+               <div class="nav-profile-card__id">ID: ${shortId}</div>
              </div>
            </div>
            <hr style="margin:4px 0;border-color:var(--border)">
-           <a href="wallet.html"  class="nav-dropdown__item">💰 Wallet</a>
-           <a href="orders.html"  class="nav-dropdown__item">📦 My Orders</a>
-           <a href="wishlist.html"class="nav-dropdown__item">❤️ Wishlist</a>
+           <a href="wallet.html"   class="nav-dropdown__item">Wallet</a>
+           <a href="orders.html"   class="nav-dropdown__item">My Orders</a>
+           <a href="wishlist.html" class="nav-dropdown__item">Wishlist</a>
            <hr style="margin:4px 0;border-color:var(--border)">
-           <button class="nav-dropdown__item nav-dropdown__item--danger" onclick="logout()">🚪 Logout</button>
+           <button class="nav-dropdown__item nav-dropdown__item--danger" onclick="logout()">Logout</button>
          </div>
        </div>`
     : `<a href="login.html"  class="btn btn--ghost btn--sm">Log In</a>
        <a href="signup.html" class="btn btn--primary btn--sm">Sign Up</a>`;
+
+
+
 
 
   navRoot.innerHTML = `
@@ -90,6 +92,23 @@ async function renderNav() {
         </div>
 
         <div class="navbar__actions">
+          <!-- Day / Night toggle -->
+          <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+            <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+            </svg>
+            <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="display:none">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
           ${actionsHTML}
           <button class="navbar__hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
             <span></span><span></span><span></span>
@@ -102,7 +121,7 @@ async function renderNav() {
         ${mainLinks.replace(/class="navbar__link/g, 'class="navbar__link" style="justify-content:flex-start')}
         <hr style="border-color:var(--border)">
         ${loggedIn
-          ? `<button class="btn btn--danger btn--sm" onclick="logout()">🚪 Logout</button>`
+          ? `<button class="btn btn--danger btn--sm" onclick="logout()">Logout</button>`
           : `<a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
              <a href="signup.html" class="btn btn--primary btn--sm">Sign Up</a>`
         }
@@ -176,7 +195,37 @@ function renderSupportButton() {
 
 // ─── Auto-render when DOM is ready ───────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  renderNav();
+  initTheme();   // apply saved theme ASAP (before nav renders)
+  renderNav().then(() => syncThemeIcon()); // sync icon after nav HTML is in DOM
   renderSupportButton();
 });
 
+// ═══════════════════════════════════════════════════════════════
+// THEME  — Day / Night toggle
+// ═══════════════════════════════════════════════════════════════
+
+/** Apply the saved theme from localStorage immediately (no flash). */
+function initTheme() {
+  const saved = localStorage.getItem('shopify_theme') || 'dark';
+  if (saved === 'light') {
+    document.body.classList.add('light-mode');
+  } else {
+    document.body.classList.remove('light-mode');
+  }
+}
+
+/** Sync the sun/moon SVG icon to match the current theme. */
+function syncThemeIcon() {
+  const isLight = document.body.classList.contains('light-mode');
+  const moon = document.getElementById('theme-icon-moon');
+  const sun  = document.getElementById('theme-icon-sun');
+  if (moon) moon.style.display = isLight ? 'none'  : 'block';
+  if (sun)  sun.style.display  = isLight ? 'block' : 'none';
+}
+
+/** Toggle between dark and light mode, persist choice. */
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('shopify_theme', isLight ? 'light' : 'dark');
+  syncThemeIcon();
+}

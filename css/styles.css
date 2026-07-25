@@ -101,6 +101,53 @@
   --transition-slow: 0.35s ease;
 }
 
+/* ── Light mode overrides ─────────────────────────────────── */
+body.light-mode {
+  --bg-base:       #f0f4f8;
+  --bg-surface:    #ffffff;
+  --bg-card:       #ffffff;
+  --bg-elevated:   #f1f5f9;
+  --bg-input:      #f8fafc;
+
+  --text-primary:  #0f172a;
+  --text-secondary:#475569;
+  --text-muted:    #94a3b8;
+  --text-inverse:  #f1f5f9;
+
+  --border:        rgba(15, 23, 42, 0.1);
+  --border-hover:  rgba(99, 102, 241, 0.4);
+
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.15);
+  --shadow-card:   0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+
+  --accent-dim:    rgba(99, 102, 241, 0.1);
+}
+
+/* ── Theme toggle button ──────────────────────────────────── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+
+
 /* ============================================================
    3. CSS RESET & BASE
    ============================================================ */
