@@ -340,16 +340,25 @@ async function loadAdminOrders() {
   }
 
   // ── Fetch full details for every order in parallel ──────────
-  // GET /orders/admin/all doesn't return fulfillment_status, but
-  // GET /orders/{id} does. We fetch all of them concurrently so
-  // the fulfillment column always reflects the real DB value.
+  // GET /orders/admin/all doesn't return fulfillment_status.
+  // GET /orders/{id} does, but it may return 403 for orders belonging to
+  // other users (backend restricts access to the order owner).
+  // So we:
+  //   1. Try the detail fetch (works for admin's own orders or if backend allows it)
+  //   2. Fall back to localStorage (persisted from previous admin actions)
+  //   3. Treat customer-confirmed orders (received_confirmed_at set) as Delivered
   const detailResults = await Promise.all(orders.map(o => getOrder(o.id)));
 
-  // Merge the fulfillment_status from the detail response into the list
-  const enrichedOrders = orders.map((order, i) => ({
-    ...order,
-    fulfillment_status: detailResults[i]?.data?.fulfillment_status ?? null,
-  }));
+  const enrichedOrders = orders.map((order, i) => {
+    const detail = detailResults[i]?.data; // may be null if 403
+    const apiStatus = detail?.fulfillment_status || null;
+    // If customer confirmed receipt, treat the order as Delivered regardless
+    const confirmedByCustomer = Boolean(detail?.received_confirmed_at);
+    const effectiveStatus = confirmedByCustomer && !apiStatus
+      ? 'Delivered'
+      : getFulfillmentStatus(order.id, apiStatus); // localStorage fallback
+    return { ...order, fulfillment_status: effectiveStatus, received_confirmed_at: detail?.received_confirmed_at || null };
+  });
 
   document.getElementById('orders-table-loading').style.display = 'none';
   document.getElementById('orders-table-wrapper').style.display = 'block';
@@ -393,7 +402,10 @@ async function loadAdminOrders() {
         <td class="text-muted text-small">${escHtml(order.email || '—')}</td>
         <td>$${Number(order.total_amount).toFixed(2)}</td>
         <td>${statusBadge(order.status)}</td>
-        <td id="fulfill-badge-${order.id}">${fulfillBadge(knownStatus)}</td>
+        <td id="fulfill-badge-${order.id}">
+          ${fulfillBadge(knownStatus)}
+          ${order.received_confirmed_at ? '<br><span class="text-muted text-small" title="Customer confirmed receipt">✔ Confirmed</span>' : ''}
+        </td>
         <td class="text-muted text-small">${new Date(order.created_at).toLocaleDateString()}</td>
         <td id="fulfill-action-${order.id}">${advanceBtn}</td>
       </tr>
@@ -426,8 +438,9 @@ async function handleAdvanceFulfillment(orderId, nextStatus) {
     return;
   }
 
-  // ── Success: persist the new status to localStorage ────────
-  setFulfillmentStatus(orderId, nextStatus);
+  // ── Success: persist the new status to localStorage AND to the API response ──
+  const confirmedStatus = data?.fulfillment_status || nextStatus;
+  setFulfillmentStatus(orderId, confirmedStatus);
 
   // Update the fulfillment badge in this row without a full reload
   const badgeCell = document.getElementById(`fulfill-badge-${orderId}`);
