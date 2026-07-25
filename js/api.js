@@ -157,6 +157,16 @@ async function getUserProfile() {
 }
 
 /**
+ * GET /users/{id}
+ * Returns a user's profile by their ID.
+ * @param {string} userId
+ * @returns {{ data: { id, name, username, email, role_id }, error }}
+ */
+async function getUserById(userId) {
+  return apiFetch('GET', `/users/${userId}`, null, true);
+}
+
+/**
  * POST /auth/forgot-password
  * Sends a password-reset link to the given email.
  * @returns {{ data: { message: string }, error }}

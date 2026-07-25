@@ -104,30 +104,39 @@ async function loadCurrentUser() {
   const token = getToken();
   if (!token) { window.currentUser = null; return null; }
 
-  // Decode the JWT directly — gives us whatever the backend stored in it
-  // (commonly: sub, name, email, role_id, user_id, username, etc.)
+  // Decode JWT to get user_id immediately (no network needed)
   const jwtPayload = decodeJwtPayload(token);
 
-  // Also call /auth/me and /users/me in parallel for any extra fields
-  const [meResult, profileResult] = await Promise.all([
-    authMe(),
-    getUserProfile(),
+  // Get /auth/me first to confirm token is still valid
+  const { data: meData } = await authMe();
+  if (!meData && !jwtPayload?.sub) { window.currentUser = null; return null; }
+
+  // The user's real ID (UUID)
+  const userId = meData?.user_id || jwtPayload?.sub || jwtPayload?.user_id;
+
+  // Try every likely profile endpoint in parallel to get the real name
+  const [profileMe, profileById] = await Promise.all([
+    getUserProfile(),                          // GET /users/me
+    userId ? getUserById(userId) : { data: null }, // GET /users/{id}
   ]);
 
-  if (!meResult.data && !jwtPayload?.sub) {
-    window.currentUser = null;
-    return null;
-  }
+  // Pick whichever profile response has a name
+  const profileData = [profileMe.data, profileById.data]
+    .filter(Boolean)
+    .find(d => d.name || d.username || d.full_name)
+    || profileMe.data
+    || profileById.data
+    || {};
 
-  // Merge all sources — later sources win if the same key appears
-  // Priority: /users/me profile > /auth/me > JWT payload
+  // Merge — later keys win. Priority: profile endpoint > /auth/me > JWT
   window.currentUser = {
     ...jwtPayload,
-    ...(meResult.data   || {}),
-    ...(profileResult.data || {}),
+    ...(meData    || {}),
+    ...profileData,
   };
   return window.currentUser;
 }
+
 
 // ─── Logout ──────────────────────────────────────────────────
 

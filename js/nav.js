@@ -45,15 +45,14 @@ async function renderNav() {
     ${admin    ? `<a href="admin.html"    class="navbar__link ${getActiveClass('admin.html')}">Admin</a>` : ''}
   `;
 
-  // Check every field name the backend might use for the username
-  const userName = user?.username
-                || user?.name
+  // Real name from database — check all common field names
+  const userName = user?.name
+                || user?.username
                 || user?.full_name
                 || user?.display_name
-                || user?.sub        // JWT 'sub' field sometimes holds username
                 || user?.email?.split('@')[0]
                 || 'User';
-  const userId   = user?.id || user?.user_id || user?.sub || '';
+  const userId   = user?.user_id || user?.id || user?.sub || '';
   const initials = userName.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
   const shortId  = userId ? (String(userId).length > 8 ? String(userId).slice(0, 8) + '…' : userId) : '—';
 
