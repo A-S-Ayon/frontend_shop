@@ -75,11 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Success! The API sends a verification code to the email.
-    // Redirect to the verify page, passing the email so it's pre-filled.
+    // Success! Save name + email so the nav can show the real name.
+    // The backend has no profile endpoint that returns the name, so we
+    // persist it here at sign-up time.
+    localStorage.setItem('shopify_user_name',  name);
+    localStorage.setItem('shopify_user_email', email);
+
     showAlert('Account created! Redirecting to verification…', 'success');
     setTimeout(() => {
-      // Encode the email so it's safe in a URL
       window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
     }, 1200);
   });

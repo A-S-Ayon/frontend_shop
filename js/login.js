@@ -81,9 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Success — store the token and go home
+    // Success — store the token, save email, and go home
     setToken(data.access_token);
+    // Keep email in sync so loadCurrentUser can fall back to it
+    localStorage.setItem('shopify_user_email', email);
     window.location.href = 'index.html';
+
   });
 
   // ── "Go to Verification Page" button ──────────────────────

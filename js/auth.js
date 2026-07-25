@@ -104,35 +104,24 @@ async function loadCurrentUser() {
   const token = getToken();
   if (!token) { window.currentUser = null; return null; }
 
-  // Decode JWT to get user_id immediately (no network needed)
+  // Decode JWT for user_id and role_id (available immediately, no network)
   const jwtPayload = decodeJwtPayload(token);
 
-  // Get /auth/me first to confirm token is still valid
+  // Confirm token validity with the backend
   const { data: meData } = await authMe();
   if (!meData && !jwtPayload?.sub) { window.currentUser = null; return null; }
 
-  // The user's real ID (UUID)
-  const userId = meData?.user_id || jwtPayload?.sub || jwtPayload?.user_id;
+  // Name stored at signup time — most reliable source since the backend
+  // has no customer-facing user profile endpoint that returns the name.
+  const storedName  = localStorage.getItem('shopify_user_name')  || '';
+  const storedEmail = localStorage.getItem('shopify_user_email') || '';
 
-  // Try every likely profile endpoint in parallel to get the real name
-  const [profileMe, profileById] = await Promise.all([
-    getUserProfile(),                          // GET /users/me
-    userId ? getUserById(userId) : { data: null }, // GET /users/{id}
-  ]);
-
-  // Pick whichever profile response has a name
-  const profileData = [profileMe.data, profileById.data]
-    .filter(Boolean)
-    .find(d => d.name || d.username || d.full_name)
-    || profileMe.data
-    || profileById.data
-    || {};
-
-  // Merge — later keys win. Priority: profile endpoint > /auth/me > JWT
   window.currentUser = {
     ...jwtPayload,
-    ...(meData    || {}),
-    ...profileData,
+    ...(meData || {}),
+    // Prefer stored name; fall back to email prefix
+    name: storedName || storedEmail.split('@')[0] || '',
+    email: storedEmail,
   };
   return window.currentUser;
 }
@@ -145,6 +134,9 @@ async function loadCurrentUser() {
  */
 function logout() {
   clearToken();
+  // Clear stored profile info
+  localStorage.removeItem('shopify_user_name');
+  localStorage.removeItem('shopify_user_email');
   window.currentUser = null;
   window.location.href = 'login.html';
 }
